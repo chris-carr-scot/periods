@@ -10,8 +10,8 @@ WHERE extname = 'periods';
  1.2
 (1 row)
 
-DROP ROLE periods_unprivileged_user;
-ERROR:  role "periods_unprivileged_user" does not exist
-CREATE ROLE periods_unprivileged_user;
+DROP ROLE "periods-unprivileged-user";
+ERROR:  role "periods-unprivileged-user" does not exist
+CREATE ROLE "periods-unprivileged-user";
 /* Make tests work on PG 15 */
 GRANT CREATE ON SCHEMA public TO PUBLIC;
