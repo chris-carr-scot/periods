@@ -1,2 +1,2 @@
 DROP EXTENSION periods;
-DROP ROLE periods-unprivileged-user;
+DROP ROLE IF EXISTS "periods-unprivileged-user";
