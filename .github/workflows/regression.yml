@@ -6,17 +6,10 @@ jobs:
     strategy:
       matrix:
         pg:
-          - 18
           - 17
           - 16
           - 15
           - 14
-          - 13
-          - 12
-          - 11
-          - 10
-          - 9.6
-          - 9.5
 
     name: PostgreSQL ${{ matrix.pg }}
     runs-on: ubuntu-latest
