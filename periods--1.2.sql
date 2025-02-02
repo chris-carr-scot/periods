@@ -2501,15 +2501,20 @@ BEGIN
                 table_class, history_table_id::regclass;
         END IF;
 
-        /* Make sure the owner is correct */
-        IF table_owner IS NOT NULL THEN
-            EXECUTE format('ALTER TABLE %s OWNER TO %s', 
-                history_table_id::regclass, 
-                table_owner::regrole::name);
-        END IF;
+        EXECUTE format('ALTER TABLE %s OWNER TO %I', history_table_id::regclass, table_owner);
+
+        /*
+         * Remove all privileges other than SELECT from everyone on the history
+         * table.  We do this without error because some privileges may have
+         * been added in order to do maintenance while we were disconnected.
+         *
+         * We start by doing the table owner because that will make sure we
+         * don't have NULL in pg_class.relacl.
+         */
+        --EXECUTE format('REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE %s FROM %I',
+            --history_table_id::regclass, table_owner);
     ELSE
-        EXECUTE format('CREATE TABLE %1$I.%2$I (LIKE %1$I.%3$I INCLUDING DEFAULTS INCLUDING GENERATED INCLUDING STORAGE EXCLUDING CONSTRAINTS EXCLUDING INDEXES)', 
-            schema_name, history_table_name, table_name);
+        EXECUTE format('CREATE TABLE %1$I.%2$I (LIKE %1$I.%3$I)', schema_name, history_table_name, table_name);
         history_table_id := format('%I.%I', schema_name, history_table_name)::regclass;
 
         IF table_owner IS NOT NULL THEN
