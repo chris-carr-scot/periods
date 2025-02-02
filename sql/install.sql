@@ -7,8 +7,8 @@ SELECT extversion
 FROM pg_extension
 WHERE extname = 'periods';
 
-DROP ROLE IF EXISTS periods-unprivileged-user;
-CREATE ROLE periods-unprivileged-user;
+DROP ROLE IF EXISTS "periods-unprivileged-user";
+CREATE ROLE "periods-unprivileged-user";
 
 /* Make tests work on PG 15 */
 GRANT CREATE ON SCHEMA public TO PUBLIC;
