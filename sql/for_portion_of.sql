@@ -3,7 +3,7 @@ SELECT setting::integer < 100000 AS pre_10,
 FROM pg_settings WHERE name = 'server_version_num';
 
 /* Run tests as unprivileged user */
-SET ROLE TO periods-unprivileged-user;
+SET ROLE TO "periods-unprivileged-user";
 
 /*
  * Create a sequence to test non-serial primary keys.  This actually tests

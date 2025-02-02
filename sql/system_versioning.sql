@@ -10,7 +10,7 @@ SELECT setting::integer < 120000 AS pre_12
 FROM pg_settings WHERE name = 'server_version_num';
 
 /* Run tests as unprivileged user */
-SET ROLE TO periods-unprivileged-user;
+SET ROLE TO "periods-unprivileged-user";
 
 /* Basic SYSTEM VERSIONING */
 
