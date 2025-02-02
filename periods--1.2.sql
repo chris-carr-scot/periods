@@ -2505,7 +2505,7 @@ BEGIN
         IF table_owner IS NOT NULL THEN
             EXECUTE format('ALTER TABLE %s OWNER TO %s', 
                 history_table_id::regclass, 
-                quote_ident(table_owner::regrole::name));
+                table_owner::regrole::name);
         END IF;
     ELSE
         EXECUTE format('CREATE TABLE %1$I.%2$I (LIKE %1$I.%3$I INCLUDING DEFAULTS INCLUDING GENERATED INCLUDING STORAGE EXCLUDING CONSTRAINTS EXCLUDING INDEXES)', 
@@ -2516,7 +2516,7 @@ BEGIN
             EXECUTE format('ALTER TABLE %1$I.%2$I OWNER TO %s', 
                 schema_name, 
                 history_table_name, 
-                quote_ident(table_owner::regrole::name));
+                table_owner::regrole::name);
         END IF;
 
         RAISE NOTICE 'history table "%" created for "%", be sure to index it properly',
@@ -2544,7 +2544,7 @@ BEGIN
            AND a.attnum > 0
            AND NOT a.attisdropped
         ));
-    EXECUTE format('ALTER VIEW %1$I.%2$I OWNER TO %3$I', schema_name, view_name, table_owner);
+    EXECUTE format('ALTER VIEW %1$I.%2$I OWNER TO %s', schema_name, view_name, table_owner);
 
     /*
      * Create functions to simulate the system versioned grammar.  These must
@@ -2558,7 +2558,7 @@ BEGIN
          STABLE
         AS 'SELECT * FROM %1$I.%3$I WHERE %4$I <= $1 AND %5$I > $1'
         $$, schema_name, function_as_of_name, view_name, period_row.start_column_name, period_row.end_column_name);
-    EXECUTE format('ALTER FUNCTION %1$I.%2$I(timestamp with time zone) OWNER TO %3$I',
+    EXECUTE format('ALTER FUNCTION %1$I.%2$I(timestamp with time zone) OWNER TO %s',
         schema_name, function_as_of_name, table_owner);
 
     EXECUTE format(
@@ -2569,7 +2569,7 @@ BEGIN
          STABLE
         AS 'SELECT * FROM %1$I.%3$I WHERE $1 <= $2 AND %5$I > $1 AND %4$I <= $2'
         $$, schema_name, function_between_name, view_name, period_row.start_column_name, period_row.end_column_name);
-    EXECUTE format('ALTER FUNCTION %1$I.%2$I(timestamp with time zone, timestamp with time zone) OWNER TO %3$I',
+    EXECUTE format('ALTER FUNCTION %1$I.%2$I(timestamp with time zone, timestamp with time zone) OWNER TO %s',
         schema_name, function_between_name, table_owner);
 
     EXECUTE format(
@@ -2580,7 +2580,7 @@ BEGIN
          STABLE
         AS 'SELECT * FROM %1$I.%3$I WHERE %5$I > least($1, $2) AND %4$I <= greatest($1, $2)'
         $$, schema_name, function_between_symmetric_name, view_name, period_row.start_column_name, period_row.end_column_name);
-    EXECUTE format('ALTER FUNCTION %1$I.%2$I(timestamp with time zone, timestamp with time zone) OWNER TO %3$I',
+    EXECUTE format('ALTER FUNCTION %1$I.%2$I(timestamp with time zone, timestamp with time zone) OWNER TO %s',
         schema_name, function_between_symmetric_name, table_owner);
 
     EXECUTE format(
@@ -2591,7 +2591,7 @@ BEGIN
          STABLE
         AS 'SELECT * FROM %1$I.%3$I WHERE $1 < $2 AND %5$I > $1 AND %4$I < $2'
         $$, schema_name, function_from_to_name, view_name, period_row.start_column_name, period_row.end_column_name);
-    EXECUTE format('ALTER FUNCTION %1$I.%2$I(timestamp with time zone, timestamp with time zone) OWNER TO %3$I',
+    EXECUTE format('ALTER FUNCTION %1$I.%2$I(timestamp with time zone, timestamp with time zone) OWNER TO %s',
         schema_name, function_from_to_name, table_owner);
 
     /* Set privileges on history objects */
@@ -3358,7 +3358,7 @@ BEGIN
 
     /* Fix up history and for-portion objects ownership */
     FOR cmd IN
-        SELECT format('ALTER %s %s OWNER TO %I',
+        SELECT format('ALTER %s %s OWNER TO %s',
             CASE ht.relkind
                 WHEN 'r' THEN 'TABLE'
                 WHEN 'v' THEN 'VIEW'
@@ -3371,7 +3371,7 @@ BEGIN
 
         UNION ALL
 
-        SELECT format('ALTER VIEW %s OWNER TO %I', fpt.oid::regclass, t.relowner::regrole)
+        SELECT format('ALTER VIEW %s OWNER TO %s', fpt.oid::regclass, t.relowner::regrole)
         FROM periods.for_portion_views AS fpv
         JOIN pg_class AS t ON t.oid = fpv.table_name
         JOIN pg_class AS fpt ON fpt.oid = fpv.view_name
@@ -3379,7 +3379,7 @@ BEGIN
 
         UNION ALL
 
-        SELECT format('ALTER FUNCTION %s OWNER TO %I', p.oid::regprocedure, t.relowner::regrole)
+        SELECT format('ALTER FUNCTION %s OWNER TO %s', p.oid::regprocedure, t.relowner::regrole)
         FROM periods.system_versioning AS sv
         JOIN pg_class AS t ON t.oid = sv.table_name
         JOIN pg_proc AS p ON p.oid = ANY (ARRAY[sv.func_as_of, sv.func_between, sv.func_between_symmetric, sv.func_from_to]::regprocedure[])
